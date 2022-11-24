@@ -24,3 +24,6 @@ class Id:
 
     def format_string(self):
         return f"{self.century}{self.year:02}{self.month:02}{self.day:02}{self.special:04}"
+
+    def format_in(self):
+        return self.century * 10**11 + self.year * 10**9 + self.month * 10**7 + self.day * 10**5 + self.special
