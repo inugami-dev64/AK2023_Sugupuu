@@ -6,4 +6,5 @@ class Person:
 
     def __init__(self):
         self.name = "John Smith"
-        self.eid = 
+        self.eid = 0
+        self.spouse_id = 0

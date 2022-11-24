@@ -1,16 +1,28 @@
+from sugupuu.id import Id
+
 class Person:
     name: str
-    eid: int
-    spouse_eid: int
+    eid: Id
+    spouse_eid: Id
     children: []
 
     def __init__(self):
         self.name = "John Smith"
-        self.eid = 35411110289
-        self.spouse_eid = 0
 
     def __init__(self, _name, _eid, _spouse_eid, _children):
         self.name = _name
         self.eid = _eid
         self.spouse_eid = _spouse_eid
         self.children = _children
+
+    def format_string(self):
+        fstr = f"{self.name}*{self.eid.format_string()}"
+        if self.spouse_eid.century != 0:
+            fstr = fstr + f"*{self.spouse_eid.format_string()}"
+        
+        for child in self.children:
+            fstr = fstr + f"*{child.format_string()}"
+
+        fstr = fstr + '#'
+
+        return fstr
