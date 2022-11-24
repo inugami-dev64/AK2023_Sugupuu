@@ -1,7 +1,12 @@
+# File: dataparse.py - functions for parsing text data about family tree
+# Contributors: Karl-Mihkel Ott
+# Last modified: 2022-11-24
+
 from sugupuu.person import Person
 from sugupuu.id import Id
 from copy import deepcopy
 
+# Convert ID number integer into sugupuu.id.Id class instance
 def int_to_eid(int_eid):
     eid = Id()
     eid.century = int(int_eid / 10**10)
@@ -19,6 +24,7 @@ def int_to_eid(int_eid):
     eid.special = int_eid
     return eid
 
+# Read EID value from current position
 def read_eid(line_str, line_nr, pos, filename, throw=True):
     end_bit = False
     eid_pos = line_str.find('*', pos)
@@ -34,11 +40,12 @@ def read_eid(line_str, line_nr, pos, filename, throw=True):
     return (eid, end_bit)
 
 
+# Read family tree data from file
 def read_from_file(filename):
     f = open(filename, 'r')
     lines = f.readlines()
 
-    # People dictionary
+    # Family-member dictionary
     people = {}
 
     line_nr = 1

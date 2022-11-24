@@ -1,3 +1,7 @@
+# File: generate_dataset.py - family tree generation script
+# Contributors: Karl-Mihkel Ott
+# Last modified: 2022-11-24
+
 import random
 import heapq
 import names
@@ -5,12 +9,7 @@ from copy import deepcopy
 from sugupuu.person import Person
 from sugupuu.id import Id
 
-# The generic structure of 11 number Estonian ID code is following:
-#   1: 1 - for 19th century male, 2 - for 19th century female, 3 - for 20th century male, 4 - for 20th century female, 5 - for 21th centrury male, 6 - for 21th centrury female
-#   2-3: year of birth
-#   4-5: month of birth
-#   6-7: day of birth
-#   8-11: special identification code (probably derived from hospital of birth IIRC)
+# Use random.py library to generate semi-random Estonian ID number
 def generate_random_eid(_centuryset):
     eid = Id()
     eid.century = random.sample(_centuryset, k=1)[0]
@@ -27,6 +26,7 @@ def generate_random_eid(_centuryset):
     return eid
 
 
+# Utility function to print EIDs in accending order using heapq
 def print_eids(male_eids, female_eids):
     print("Male:")
     while(male_eids):
@@ -37,6 +37,7 @@ def print_eids(male_eids, female_eids):
         print(heapq.heappop(female_eids).format_string())
 
 
+# Generate N male members and N female members
 def generate_data_set(N):
     # each parent has max 3 children
     child_count = 2
@@ -104,6 +105,7 @@ def generate_data_set(N):
     return people
 
 
+# Entry point
 N = int(input())
 people = generate_data_set(N)
 
