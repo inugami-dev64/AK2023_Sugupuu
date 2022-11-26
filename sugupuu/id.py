@@ -35,10 +35,26 @@ class Id:
         else:
             return self.day < other.day
 
+    # convert int into Id
+    def int_to_eid(self, int_eid: int):
+        self.century = int(int_eid / 10**10)
+        int_eid = int_eid % 10**10
+
+        self.year = int(int_eid / 10**8)
+        int_eid = int_eid % 10**8
+
+        self.month = int(int_eid / 10**6)
+        int_eid = int_eid % 10**6
+
+        self.day = int(int_eid / 10**4)
+        int_eid = int_eid % 10**4
+
+        self.special = int_eid
+
     # format EID into string value
     def format_string(self):
         return f"{self.century}{self.year:02}{self.month:02}{self.day:02}{self.special:04}"
 
     # format EID into int value
     def format_int(self):
-        return self.century * 10**11 + self.year * 10**9 + self.month * 10**7 + self.day * 10**5 + self.special
+        return self.century * 10**10 + self.year * 10**8 + self.month * 10**6 + self.day * 10**4 + self.special

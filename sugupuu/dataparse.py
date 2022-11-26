@@ -6,24 +6,6 @@ from sugupuu.person import Person
 from sugupuu.id import Id
 from copy import deepcopy
 
-# Convert ID number integer into sugupuu.id.Id class instance
-def int_to_eid(int_eid):
-    eid = Id()
-    eid.century = int(int_eid / 10**10)
-    int_eid = int_eid % 10**10
-
-    eid.year = int(int_eid / 10**8)
-    int_eid = int_eid % 10**8
-
-    eid.month = int(int_eid / 10**6)
-    int_eid = int_eid % 10**6
-
-    eid.day = int(int_eid / 10**4)
-    int_eid = int_eid % 10**4
-
-    eid.special = int_eid
-    return eid
-
 # Read EID value from current position
 def read_eid(line_str, line_nr, pos, filename, throw=True):
     end_bit = False
@@ -36,7 +18,8 @@ def read_eid(line_str, line_nr, pos, filename, throw=True):
         elif eid_pos == -1 and not throw:
             return None
     
-    eid = int_to_eid(int(line_str[pos:eid_pos]))
+    eid = Id()
+    eid.int_to_eid(int(line_str[pos:eid_pos]))
     return (eid, end_bit)
 
 
@@ -77,12 +60,12 @@ def read_from_file(filename):
                     children.append(child[0])
                     end_bit = child[1]
 
-                people[eid[0]] = Person(name, eid[0], spouse_eid[0], children)
+                people[eid[0].format_int()] = Person(name, eid[0], spouse_eid[0], children)
             else:
-                people[eid[0]] = Person(name, eid[0], spouse_eid[0], [])
+                people[eid[0].format_int()] = Person(name, eid[0], spouse_eid[0], [])
 
         else:
-            people[eid[0]] = Person(name, eid[0], Id(), [])
+            people[eid[0].format_int()] = Person(name, eid[0], Id(), [])
             
         line_nr = line_nr + 1
 
