@@ -22,7 +22,7 @@ HELP_TEXT = "When using generic mode:\n"\
             "\t>exit|quit - exit the application\n"\
             "When using selection mode:\n"\
             "\t>help - show the help text\n"\
-            "\t>children [level <N>] [filter eid|name|spouse_name|spouse_eid ...] - output children data\n"\
+            "\t>children [recurse] [level <N>] [filter eid|name|spouse_name|spouse_eid ...] - output children data\n"\
             "\t>spouse [filter eid|name]- output spouse data\n"\
             "\t>info [filter eid|name|spouse_name|spouse_eid ...]- output information about currently selected person\n"\
             "\t>add_child - prompt to add a new child for currently selected person\n"\
@@ -110,6 +110,7 @@ def parse_generic(cmd: str, tree: {}, state: State):
                         filter_bits = filter_bits | FILTER_BIT_SPOUSE_EID
             else:
                 filter_bits = FILTER_BIT_ALL
+
             
             for key in tree:
                 filter_and_output_person_data(tree[key], tree, filter_bits)
@@ -123,14 +124,21 @@ def add_child(person: Person, tree: {}):
     eid = Id()
     eid.int_to_eid(int(input("Enter child's ID number > ")))
     spouse_eid = Id()
-    spouse_eid.int_to_eid(int(input("Enter spouse's ID number > ")))
 
-    tree[eid.format_int()] = Person(
+    str_spouse_eid = input("Enter spouse's ID number > ")
+    
+    if str_spouse_eid != '':
+        spouse_eid.int_to_eid(int(str_spouse_eid))
+
+    person.children.append(eid)
+    child = Person(
         name,
         eid,
         spouse_eid,
         []
     )
+
+    tree[eid.format_int()] = child
 
                 
 
@@ -146,10 +154,11 @@ def parse_selection(cmd: str, tree: {}, state: State):
         words = cmd.split(' ')
 
         # Output children data
-        if words[0] == "children":
+        if words and words[0] == "children":
             level = 1
             filter_bits = 0
             capture_filter = False
+            recurse_bit = False
 
             i = 1
             while(i < len(words)):
@@ -182,7 +191,7 @@ def parse_selection(cmd: str, tree: {}, state: State):
 
             children = treesearch.search_children(state.person, level, tree)
             filter_and_output_children_data(children, tree, filter_bits)
-        elif words[0] == "spouse":
+        elif words and words[0] == "spouse":
             # No spouse present
             if state.person.spouse_eid.century == 0:
                 return
@@ -202,6 +211,26 @@ def parse_selection(cmd: str, tree: {}, state: State):
                 filter_bits = FILTER_BIT_EID | FILTER_BIT_NAME
 
             filter_and_output_person_data(tree[state.person.spouse_eid.format_int()], tree, filter_bits)
+
+        elif words and words[0] == "info":
+            filter_bits = 0
+            if len(words) > 1 and words[1] == "filter":
+                for i in range(2, len(words)):
+                    if words[i] == "eid":
+                        filter_bits = filter_bits | FILTER_BIT_EID
+                    elif words[i] == "name":
+                        filter_bits = filter_bits | FILTER_BIT_NAME
+                    elif words[i] == "spouse_name":
+                        filter_bits = filter_bits | FILTER_BIT_SPOUSE_NAME
+                    elif words[i] == "spouse_eid":
+                        filter_bits = filter_bits | FILTER_BIT_SPOUSE_EID
+                    else:
+                        print(f"Unknown command: {cmd}")
+                        return
+            else:
+                filter_bits = FILTER_BIT_ALL
+
+            filter_and_output_person_data(tree[state.person.eid.format_int()], tree, filter_bits)
 
         else:
             print(f"Unknown command: {cmd}")

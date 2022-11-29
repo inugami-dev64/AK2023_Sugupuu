@@ -49,7 +49,7 @@ def search_by_spouse_eid(spouse_eid: int, tree: {}):
 
 
 # Search all children for given person
-def search_children(person: Person, level: int, tree: {}):
+def search_children(person: Person, level: int, tree: {}, recursive=True):
     if level == 0:
         return []
     
@@ -58,7 +58,8 @@ def search_children(person: Person, level: int, tree: {}):
 
     # Push first generation children
     for child in person.children:
-        children.append((tree[child.format_int()], 1))
+        if recursive:
+            children.append((tree[child.format_int()], 1))
         queue.append((child, 1))
 
     while queue:
