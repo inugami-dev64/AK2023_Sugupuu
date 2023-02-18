@@ -35,7 +35,7 @@ def search_by_spouse_name(spouse_name: str, tree: {}):
 
 
 # O(N)
-def search_by_spouse_eid(spouse_eid: int, tree: {}):
+def search_by_spouse_int_eid(spouse_eid: int, tree: {}):
     eid = Id()
     eid.int_to_eid(spouse_eid)
 

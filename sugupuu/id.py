@@ -27,7 +27,7 @@ class Id:
     # operator< overload for C++ people
     def __lt__(self, other):
         if self.century != other.century:
-            return self.century < other.century;
+            return self.century < other.century
         elif self.year != other.year:
             return self.year < other.year
         elif self.month != other.month:
