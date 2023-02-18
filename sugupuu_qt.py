@@ -119,7 +119,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.state=State()
-        self.tree = dataparse.read_from_file("tree.txt")
+        self.tree = dataparse.read_from_file("test.txt")
         self.setWindowTitle("Sugupuu")
         self.person={}
         
