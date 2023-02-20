@@ -7,8 +7,8 @@ from re import sub
 # Internal module imports
 from sugupuu.id import Id
 from sugupuu.person import Person
-import sugupuu.dataparse as dataparse
-import sugupuu.treesearch as treesearch
+import sugupuu.data as data
+import sugupuu.tree as tree
 import sugupuu.textformat as fmt
 import sys
 
@@ -34,13 +34,14 @@ from PyQt5.QtGui import QStandardItem, QStandardItemModel
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        fname = self.pick_file()
-        if fname == "":
+        self.filename = self.pick_file()
+        if self.filename == "":
             sys.exit(0)
 
-        self.tree = dataparse.read_from_file(fname)
+        self.tree = data.read_from_file(self.filename)
         self.setWindowTitle("AsiKarikas 2023 Sugupuu")
         self.person={}
+
         layout=QVBoxLayout()
         layout.setSpacing(16)
         layout.setContentsMargins(8,8,8,8)
@@ -50,7 +51,7 @@ class MainWindow(QMainWindow):
         Line1.setSpacing(16)
         self.SearchBy=QComboBox()
         self.SearchParam=QLineEdit()
-        self.SearchBy.addItems(["eid", "name", "spouse_eid", "spouse_name"])
+        self.SearchBy.addItems(["EID", "Name", "Spouse EID", "Spouse Name"])
         for i in [QLabel("Search by"), self.SearchBy, self.SearchParam]:
             Line1.addWidget(i)
         widget1=QWidget()
@@ -77,7 +78,7 @@ class MainWindow(QMainWindow):
 
         # Add Child 
         AddChildrenLayout=QHBoxLayout()
-        layout.addWidget(QLabel("Add Child\nThe first parent is that who you have searched above"))
+        layout.addWidget(QLabel("Add a Child\nThe first parent is that who you have searched above.\nThe second parent is first's spouse."))
         self.childName=QLineEdit()
         self.childEID=QLineEdit()
         self.childSpouseEID=QLineEdit()
@@ -88,8 +89,9 @@ class MainWindow(QMainWindow):
         self.childSpouseEID.setInputMask("00000000000")
         self.childEID.setInputMask("00000000000")
         
-        for i in [QLabel("name"), self.childName, QLabel("EID"), self.childEID, QLabel("Other parent EID"), self.childSpouseEID, self.addChildButton]:
+        for i in [QLabel("Name"), self.childName, QLabel("EID"), self.childEID, QLabel("Spouse EID"), self.childSpouseEID, self.addChildButton]:
             AddChildrenLayout.addWidget(i)
+
         AddChild=QWidget()
         AddChild.setLayout(AddChildrenLayout)
         layout.addWidget(AddChild)
@@ -166,36 +168,42 @@ class MainWindow(QMainWindow):
 
     def searchby(self):
         text=self.SearchParam.text()
-        if self.SearchBy.currentText()=="eid" or self.SearchBy.currentText()=="spouse_eid": 
+        if self.SearchBy.currentText()=="EID" or self.SearchBy.currentText()=="Spouse EID": 
             text = sub("[^\d\.]", "", text)
 
         if text == "": 
             return
 
-        if self.SearchBy.currentText()=="eid":
-            self.person=treesearch.search_by_int_eid(int(text), self.tree)
+        if self.SearchBy.currentText()=="EID":
+            self.person=tree.search_by_int_eid(int(text), self.tree)
 
-        elif self.SearchBy.currentText()=="name":
-            self.person=treesearch.search_by_name(text, self.tree)
+        elif self.SearchBy.currentText()=="Name":
+            self.person=tree.search_by_name(text, self.tree)
 
-        elif self.SearchBy.currentText()=="spouse_eid":
-            self.person=treesearch.search_by_spouse_int_eid(int(text), self.tree)
+        elif self.SearchBy.currentText()=="Spouse EID":
+            self.person=tree.search_by_spouse_int_eid(int(text), self.tree)
 
-        elif self.SearchBy.currentText()=="spouse_name":
-            self.person=treesearch.search_by_spouse_name(text, self.tree)
+        elif self.SearchBy.currentText()=="Spouse Name":
+            self.person=tree.search_by_spouse_name(text, self.tree)
 
         # Output search result data to internal console
         if self.person is not None:
-            children = treesearch.search_children(self.person, 1, self.tree)
+            children = tree.search_children(self.person, 1, self.tree)
             out = fmt.filter_and_output_person_data(self.person, self.tree, fmt.FILTER_BIT_ALL)
             out += fmt.filter_and_output_children_data(children, self.tree, fmt.FILTER_BIT_ALL)
             self.output.setText(out)
             
     def addperson(self):
         name= self.childName.text()
-        childEid=int(self.childEID.text())
-        spouse_eid=int(self.childSpouseEID.text())
-        add_child(self.person, self.tree, name, childEid, spouse_eid)
+        child_eid = int(self.childEID.text())
+
+        str_spouse = '0'
+        if str_spouse != '0':
+            str_spouse = self.childSpouseEID.text()
+
+
+        spouse_eid = int(str_spouse)
+        tree.add_child(self.person, self.tree[self.person.spouse_eid.format_int()], self.tree, name, child_eid, spouse_eid, self.filename)
         
 
 if __name__ == '__main__':

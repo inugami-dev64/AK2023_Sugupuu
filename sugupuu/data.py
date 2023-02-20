@@ -72,3 +72,19 @@ def read_from_file(filename):
     f.close()
     return people
 
+
+# Save changes to file
+def save(tree: {}, filename: str):
+    f = open(filename, 'w')
+    for key in tree:
+        f.write(f"{tree[key].name}*")
+        f.write(tree[key].eid.format_string())
+
+        if tree[key].spouse_eid.format_int() != 0:
+            f.write(f"*{tree[key].spouse_eid.format_string()}")
+            for i in range(0, len(tree[key].children)):
+                f.write(f"*{tree[key].children[i].format_string()}")
+
+        f.write('#\n')
+    f.close()
+
