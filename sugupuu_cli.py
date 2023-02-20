@@ -46,33 +46,6 @@ def change_to_selection_mode(person, state: State):
         state.person = person
 
 
-# Output data about person according to specified filter bits
-def filter_and_output_person_data(person: Person, tree: {}, filter_bits: int):
-    print()
-    if filter_bits & FILTER_BIT_NAME:
-        print(f"Name: {person.name}")
-    if filter_bits & FILTER_BIT_EID:
-        print(f"Estonian ID: {person.eid.format_string()}")
-    if filter_bits & FILTER_BIT_SPOUSE_NAME and person.spouse_eid.century != 0:
-        print(f"Spouse name: {tree[person.spouse_eid.format_int()].name}")
-    if filter_bits & FILTER_BIT_SPOUSE_EID and person.spouse_eid.century != 0:
-        print(f"Spouse Estonian ID: {person.spouse_eid.format_string()}")
-
-
-# Output data about person's children according to speficied filter bits
-def filter_and_output_children_data(children: [], tree: {}, filter_bits: int):
-    for child in children:
-        print(f"\nGeneration: {child[1]}")
-        if filter_bits & FILTER_BIT_NAME:
-            print(f"Name: {child[0].name}")
-        if filter_bits & FILTER_BIT_EID:
-            print(f"Estonian ID: {child[0].eid.format_string()}")
-        if filter_bits & FILTER_BIT_SPOUSE_NAME and child[0].spouse_eid.century != 0:
-            print(f"Spouse name: {tree[child[0].spouse_eid.format_int()].name}")
-        if filter_bits & FILTER_BIT_SPOUSE_EID and child[0].spouse_eid.century != 0:
-            print(f"Spouse Estonian ID: {child[0].spouse_eid.format_string()}")
-
-
 # Parse generic mode command
 def parse_generic(cmd: str, tree: {}, state: State):
     if cmd == "help":
