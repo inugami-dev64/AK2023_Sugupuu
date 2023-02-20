@@ -10,7 +10,21 @@ import sugupuu.dataparse as dataparse
 import sugupuu.treesearch as treesearch
 import sys
 from PyQt5 import uic
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QLineEdit, QLabel, QComboBox, QTabWidget, QPushButton, QVBoxLayout, QHBoxLayout, QTableView, QCheckBox
+from PyQt5.QtWidgets import (
+    QApplication, 
+    QMainWindow, 
+    QWidget, 
+    QLineEdit, 
+    QLabel, 
+    QComboBox, 
+    QTabWidget, 
+    QPushButton, 
+    QVBoxLayout, 
+    QHBoxLayout, 
+    QTableView, 
+    QFileDialog,
+    QCheckBox)
+
 from PyQt5.QtGui import QStandardItem, QStandardItemModel
 
 # Bits for filtering 
@@ -114,15 +128,35 @@ def add_child(person: Person, tree: {}, name:str, childEid:int, str_spouse_eid:i
 def only_numerics(seq):
     seq_type= type(seq)
     return seq_type().join(filter(seq_type.isdigit, seq))
-    
+
+
 class MainWindow(QMainWindow):
+    def pick_file(self):
+        dlg = QFileDialog()
+        dlg.setFileMode(QFileDialog.AnyFile)
+        dlg.setNameFilter("Text files (*.txt)")
+        dlg.setViewMode(QFileDialog.ViewMode.List)
+
+        if dlg.exec():
+            filenames = dlg.selectedFiles()
+
+            if filenames:
+                return filenames[0]
+
+        
+        return ""
+
+
     def __init__(self):
         super().__init__()
         self.state=State()
-        self.tree = dataparse.read_from_file("test.txt")
-        self.setWindowTitle("Sugupuu")
+        fname = self.pick_file()
+        if fname == "":
+            sys.exit(0)
+
+        self.tree = dataparse.read_from_file(fname)
+        self.setWindowTitle("AsiKarikas 2023 Sugupuu")
         self.person={}
-        
         layout=QVBoxLayout()
         layout.setSpacing(16)
         layout.setContentsMargins(8,8,8,8)
