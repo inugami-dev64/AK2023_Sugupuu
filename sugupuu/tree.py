@@ -114,8 +114,10 @@ def add_child(parent1: Person, parent2: Person, tree: {}, name: str, child_eid: 
     spouse_eid = Id()
     spouse_eid.int_to_eid(int_spouse_eid)
 
-    parent1.children.append(eid)
-    parent2.children.append(eid)
+    if parent1 != None:
+        parent1.children.append(eid)
+    if parent2 != None:
+        parent2.children.append(eid)
     child = Person(
         name,
         eid,

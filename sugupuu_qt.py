@@ -61,6 +61,7 @@ class MainWindow(QMainWindow):
         # Add table view to display data
         self.table_view = QTableView()
         self.table_model = QStandardItemModel(self.table_view)
+        self.table_model.itemChanged.connect(self.entry_changed)
         self.table_view.setModel(self.table_model)
         self.table_view.horizontalHeader().setStretchLastSection(True)
         # filtering bits
@@ -69,7 +70,6 @@ class MainWindow(QMainWindow):
         self.filter_name = QCheckBox("Name")
         self.filter_spouse_eid = QCheckBox("Spouse Estonian ID")
         self.filter_spouse_name = QCheckBox("Spouse Name")
-        self.filter_alive = QCheckBox("Alive")
 
         # Add output label for selected person's data
         self.output=QLabel()
@@ -105,7 +105,7 @@ class MainWindow(QMainWindow):
         layout.addWidget(filterLayW)
         layout.addWidget(self.table_view)
         
-        mainWidget=QWidget()
+        mainWidget = QWidget()
         mainWidget.setLayout(layout)
         self.setCentralWidget(mainWidget)
         
@@ -121,7 +121,6 @@ class MainWindow(QMainWindow):
         self.filter_eid.stateChanged.connect(self.update_table_view)
         self.filter_spouse_name.stateChanged.connect(self.update_table_view)
         self.filter_spouse_eid.stateChanged.connect(self.update_table_view)
-        self.filter_alive.stateChanged.connect(self.update_table_view)
 
 
     def pick_file(self):
@@ -156,14 +155,51 @@ class MainWindow(QMainWindow):
                 if person.spouse_eid.century != 0:
                     spouse_name = '-' if person.spouse_eid is None else self.tree[person.spouse_eid.format_int()].name
                     row.append(QStandardItem(spouse_name))
-            if self.filter_alive.isChecked() and not person.is_alive():
-                continue
             self.table_model.appendRow(row)
-        if self.filter_eid.isChecked(): labels.append("Estonian ID") 
-        if self.filter_name.isChecked(): labels.append("Name") 
-        if self.filter_spouse_eid.isChecked(): labels.append("Spouse EID") 
-        if self.filter_spouse_name.isChecked(): labels.append("Spouse name") 
+
+        if self.filter_eid.isChecked(): 
+            labels.append("Estonian ID") 
+        if self.filter_name.isChecked(): 
+            labels.append("Name") 
+        if self.filter_spouse_eid.isChecked(): 
+            labels.append("Spouse EID") 
+        if self.filter_spouse_name.isChecked(): 
+            labels.append("Spouse name") 
         self.table_model.setHorizontalHeaderLabels(labels)
+
+
+    def entry_changed(self, entry):
+
+        # Check if EID column was changed
+        if entry.column() == 0:
+            new_eid = Id()
+            new_eid.int_to_eid(int(self.table_model.item(entry.row(), entry.column()).text()))
+
+            i = 0
+            person = Person()
+            for key in self.tree:
+                if i == entry.row():
+                    person = self.tree[key]
+                    self.tree.pop(key)
+                    break
+                i += 1
+
+            person.eid = new_eid
+            self.tree[new_eid.format_int()] = person
+        # Name column was changed
+        elif entry.column() == 1:
+            name = str(self.table_model.item(entry.row(), entry.column()).text())
+            eid = int(self.table_model.item(entry.row(), 0).text())
+            self.tree[eid].name = name
+        # Spouse EID was changed
+        elif entry.column() == 2:
+            spouse_eid = Id()
+            spouse_eid.int_to_eid(int(self.table_model.item(entry.row(), entry.column()).text()))
+            eid = int(self.table_model.item(entry.row(), 0).text())
+            self.tree[eid].spouse_eid = spouse_eid
+
+        data.save(self.tree, self.filename)
+
 
 
     def searchby(self):
@@ -197,13 +233,21 @@ class MainWindow(QMainWindow):
         name= self.childName.text()
         child_eid = int(self.childEID.text())
 
-        str_spouse = '0'
-        if str_spouse != '0':
-            str_spouse = self.childSpouseEID.text()
+        str_spouse = self.childSpouseEID.text()
+        if str_spouse == '':
+            str_spouse = '0'
 
 
         spouse_eid = int(str_spouse)
-        tree.add_child(self.person, self.tree[self.person.spouse_eid.format_int()], self.tree, name, child_eid, spouse_eid, self.filename)
+        if self.person:
+            if not int(str_spouse) in self.tree:
+                tree.add_child(self.person, None, self.tree, name, child_eid, spouse_eid, self.filename)
+            else:
+                tree.add_child(self.person, self.tree[int(str_spouse)], self.tree, name, child_eid, spouse_eid, self.filename)
+        else:
+            tree.add_child(None, None, self.tree, name, child_eid, spouse_eid, self.filename)
+
+        self.update_table_view()
         
 
 if __name__ == '__main__':
