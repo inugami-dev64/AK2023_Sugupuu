@@ -27,5 +27,5 @@ python sugupuu_XXX.py
 
 ## Contributors
 
-Algorithms and data structures: Karl-Mihkel Ott
+Algorithms and data structures: Karl-Mihkel Ott  
 GUI: Uko Poschlin
